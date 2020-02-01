@@ -13,8 +13,6 @@ db_connection = mysql.connector.connect(
 my_database = db_connection.cursor()
 
 
-
-
 # Flask constructor takes the name of  
 # current module (__name__) as argument. 
 app = Flask(__name__) 

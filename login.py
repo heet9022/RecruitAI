@@ -17,13 +17,8 @@ crud
 # database module
 
 driver = webdriver.Chrome()
-<<<<<<< HEAD:login_deep.py
 email="akumar2243@gmail.com"
 password="9SCgSNN78S*p2kw"
-=======
-email="pratyushparashar1999@gmail.com"
-password="shibu_1999"
->>>>>>> 3f6dccf23a8536064c4341d6adce892051be18b8:login.py
 driver.get("https://www.linkedin.com/login")
 element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 email_elem = driver.find_element_by_id("username")
