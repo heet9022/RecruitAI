@@ -40,9 +40,9 @@ for link in L.links[0]:
         profile_pic=img[0]['src']
         about =soup.findAll("p",{"class":"pv-about__summary-text"})
     except:
-        print("error in about")       
-        traceback.print_exc()         
-    about_data=[]   
+        print("error in about")
+        traceback.print_exc()
+    about_data=[]
     for e in about[0]:
         try:
             about_data.append(e.text.strip())
@@ -74,7 +74,7 @@ for link in L.links[0]:
             continue
         else:
             exp.append(data)
-        
+
     expdata=[]
     for e in exp:
         ls=e.splitlines()
@@ -110,6 +110,6 @@ for link in L.links[0]:
             f.write(s.strip())
             print(s)
     except:
-        print("error in skills")    
+        print("error in skills")
         traceback.print_exc()
     count+=1
