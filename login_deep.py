@@ -38,8 +38,8 @@ def insertDB(name, location, skills, exp, about, title):
 
 
 driver = webdriver.Chrome()
-email="codeadventurebot@gmail.com"
-password="codeadventurebot"
+email="akumar2243@gmail.com"
+password="9SCgSNN78S*p2kw"
 driver.get("https://www.linkedin.com/login")
 element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 email_elem = driver.find_element_by_id("username")
