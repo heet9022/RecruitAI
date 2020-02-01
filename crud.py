@@ -1,97 +1,61 @@
-# from firebase import firebase  
-# firebase = firebase.FirebaseApplication('https://recruitai-27ea6.firebaseio.com/', None)  
-# data =  { 'Name': 'Vivek',  
-#           'RollNo': 1,  
-#           'Percentage': 76.02  
-#           }  
-# result = firebase.post('/recruitai-27ea6/Profiles/',data)  
-# print(result) 
+import mysql.connector
 
+db_connection = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="",
+    database="recruitai"
+)
+my_database = db_connection.cursor()
 
-#!/usr/bin/env python
-import argparse
-import json
-import sys
-import requests
-import pyrebase
+profiles = [] # array of profiles # list
+profile = {} # json of each profile # dict
 
-def die(message, status=1):
-    sys.stderr.write("Error: {}\n".format(message))
-    sys.exit(status)
-# end
+def insertDB(name, location, skills, exp, about, title):
+    
+    print(".............INSERTING INTO Database...........")
+    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`, title) VALUES (%s, %s, %s, %s, %s, %s)"
+    val = (name, location, skills, exp, about, title)
+    my_database.execute(sql, val)
 
-def firebase_db_init():
-    config = {
-        "apiKey": "AIzaSyDkEEDaLbDmfe-TgmL1zkbBFy6abMBmbEg",
-        "authDomain": "recruitai-27ea6.firebaseapp.com",
-        "databaseURL": "https://recruitai-27ea6.firebaseio.com",
-        "projectId": "recruitai-27ea6",
-        "storageBucket": "recruitai-27ea6.appspot.com",
-        "messagingSenderId": "978296144862"
-    }
-    # config["serviceAccount"] = '/path/to/firebase_service_key.json'
+    db_connection.commit()
 
-    try:
-        firebase = pyrebase.initialize_app(config)
-        return firebase.database()
-    except Exception as e:
-        die("db_init failed. {}".format(e))
-    # try 
-# end
+def readDB():
 
-def get_url(url):
-    r = requests.get(url)
-    if r.status_code == 200:
-        return r.json()
-    else:
-        die("HTTP GET {} failed with status={}".format(url, r.status_code))
-# end
+    my_database.execute("SELECT * FROM profiles")
 
-def set_record(dbHandle, tableName, keyName, data):
-    try:
-        dbHandle.child(tableName).child(keyName).set(data)
-    except Exception as e:
-        die("set_record failed. {}".format(e))
-    # try 
-# end
+    myresult = my_database.fetchall()
 
-def get_record(dbHandle, tableName, keyName):
-    try:
-        return dbHandle.child(tableName).child(keyName).get().val()
-    except Exception as e:
-        die("get_record failed. {}".format(e))
-    # try
-# end
+    for x in myresult:
+        
+        profile = {}
+        profile['id'] = x[0]
+        profile['name'] = x[1]
+        profile['location'] = x[2]
 
-def delete_record(dbHandle, tableName, keyName):
-    try:
-        dbHandle.child(tableName).child(keyName).remove()
-    except Exception as e:
-        die("delete_record failed. {}".format(e))
-    # try
-# end
+        profile['skills'] = convert_skills_to_array(x[3])
+        
+        profile['experience'] = x[4]
+        profile['about '] = x[5]
+        profile['title'] = x[6]
+        
+        profiles.append(profile)
+        # print(profiles)
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--table', help='name of the DB table', required=True)
-    parser.add_argument('-k', '--key', help='key in the DB table', required=True)
-    parser.add_argument('-a', '--action', help='type of operation', default='get', choices=['get', 'set', 'delete'])
-    parser.add_argument('-u', '--url', help='url to fetch the data', required=False)
+    return profiles
 
-    args = parser.parse_args()
+def convert_skills_to_array(skills):
 
-    if (args.action == 'set') and not args.url:
-        die("--url <url> is mandatory for --action=set")
-    # if
-
-    dbHandle = firebase_db_init()
-    if (args.action == 'set'):
-        data = get_url(args.url)
-        set_record(dbHandle, args.table, args.key, data)
-    elif (args.action == 'delete'):
-        delete_record(dbHandle, args.table, args.key)
-    else:
-        data = get_record(dbHandle, args.table, args.key)
-        print("{}".format(json.dumps(data, indent=4, sort_keys=True)))
-    # if
-# end
+    data = []
+    data = skills.split('\n')
+    new_data=[]
+    for i in range(len(data)):
+        data[i] = data[i].strip()
+        if(data[i].isspace() or data[i]==''):
+            continue
+        else:
+            new_data.append(data[i])
+    
+    return new_data
+        
+readDB()
