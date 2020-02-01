@@ -1,7 +1,7 @@
 # Importing flask module in the project is mandatory 
 # An object of Flask class is our WSGI application. 
 from flask import Flask, request, render_template
-
+import login 
 import json
 import mysql.connector
 db_connection = mysql.connector.connect(
@@ -31,7 +31,7 @@ def index():
 
 @app.route('/submit')
 def submit():
-    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`) VALUES ('Deep','Mumbai','python','jhata','me')"
+    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`) VALUES (login.name,'Mumbai','python','jhata','me')"
     # val = ("John", "Highway 21"
     my_database.execute(sql)
 
