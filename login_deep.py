@@ -22,7 +22,7 @@ count=0
 
 for link in L.links[0]:
 
-    #f = open("MyFile"+str(count)+".txt","a+")
+    f = open("MyFile"+str(count)+".txt","a+")
     print(link)
     driver.get(link)
     element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "profile-nav-item")))
@@ -56,7 +56,7 @@ for link in L.links[0]:
     #print(about_data)
     if(len(about_data)>0):
         for e in about_data:
-           # f.write(e)
+            f.write(e)
 
     #exp data
     try:
@@ -99,15 +99,15 @@ for link in L.links[0]:
         print("error in name title")
         traceback.print_exc()
     print(name,title,location)
-   # f.write(name)
-    #f.write(title)
-    #f.write(location)
+    f.write(name)
+    f.write(title)
+    f.write(location)
     sel=Selector(text=driver.page_source)
     try:
         skills = sel.xpath('//*[@class="pv-skill-category-entity__name-text t-16 t-black t-bold"]/text()').extract()
         print(skills)
         for s in skills:
-           # f.write(s.strip())
+            f.write(s.strip())
             print(s)
     except:
         print("error in skills")    
