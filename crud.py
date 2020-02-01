@@ -12,7 +12,7 @@ profiles = [] # array of profiles # list
 profile = {} # json of each profile # dict
 
 def insertDB(name, location, skills, exp, about, title):
-    
+
     print(".............INSERTING INTO Database...........")
     sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`, title) VALUES (%s, %s, %s, %s, %s, %s)"
     val = (name, location, skills, exp, about, title)
@@ -58,4 +58,4 @@ def convert_skills_to_array(skills):
     
     return new_data
         
-readDB()
+# readDB()

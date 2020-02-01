@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 from parsel import Selector
 from selenium import webdriver
 
-driver=webdriver.Chrome('C:/webdrivers/chromedriver')
+driver=webdriver.Chrome()
 driver.get("https://www.google.com")
 search_query=driver.find_element_by_name('q')
 sleep(0.5)

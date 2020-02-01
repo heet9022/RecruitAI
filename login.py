@@ -8,38 +8,17 @@ from bs4 import BeautifulSoup
 import links as L
 import traceback
 
+# database module
 
+import crud
 
-####Database Code
-import mysql.connector
+crud
 
-
-db_connection = mysql.connector.connect(
-host="localhost",
-user="root",
-passwd="",
-database="recruitai"
-)
-my_database = db_connection.cursor()
-
-def insertDB(name, location, skills, exp, about, title):
-    print("INSERTING INTO DB")
-    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`, title) VALUES (%s, %s, %s, %s, %s, %s)"
-    val = (name, location, skills, exp, about, title)
-    my_database.execute(sql, val)
-
-    db_connection.commit()
-
-# init_DB()
-
-####DB Code End
-
-
-
+# database module
 
 driver = webdriver.Chrome()
-email="codeadventurebot@gmail.com"
-password="codeadventurebot"
+email="pratyushparashar1999@gmail.com"
+password="shibu_1999"
 driver.get("https://www.linkedin.com/login")
 element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
 email_elem = driver.find_element_by_id("username")
@@ -149,6 +128,5 @@ for i in range(4):
             print("error in skills")
             traceback.print_exc()
         count+=1
-        insertDB(name, location, skills_string, main_exp_data, main_about_string, title)
-        count+=1
+        crud.insertDB(name, location, skills_string, main_exp_data, main_about_string, title)
 driver.quit()
