@@ -1,7 +1,7 @@
 # Importing flask module in the project is mandatory 
 # An object of Flask class is our WSGI application. 
 from flask import Flask, request, render_template
-import login 
+# import login 
 import json
 import crud
 

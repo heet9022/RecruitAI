@@ -1,2 +1,3 @@
 env
-debug.txt
+debug.log
+__pycache__
