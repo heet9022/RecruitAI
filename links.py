@@ -9,7 +9,7 @@ driver=webdriver.Chrome()
 driver.get("https://www.google.com")
 search_query=driver.find_element_by_name('q')
 sleep(0.5)
-search_query.send_keys('site:linkedin.com/in/ AND "data analyst"')
+search_query.send_keys('site:linkedin.com/in/ AND "machine learning engineer')
 search_query.send_keys(Keys.RETURN)
 # url = driver.find_element_by_css_selector('.g a').get_attribute('href')
 #links = [x.get_attribute('href') for x in driver.find_elements_by_css_selector('.g a')]
