@@ -36,7 +36,7 @@ def readDB():
         profile['skills'] = convert_skills_to_array(x[3])
         
         profile['experience'] = x[4]
-        profile['about '] = x[5]
+        profile['about'] = x[5]
         profile['title'] = x[6]
         
         profiles.append(profile)

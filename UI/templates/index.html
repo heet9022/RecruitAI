@@ -297,24 +297,14 @@
 							<div class="single-post d-flex flex-row">
 
 								<div class="thumb">
-									<img class = "avatar" src = "{{profile['profile_photo']}}" alt="">
-									<ul class="tags">
-										<li>
-											<a href="#">Art</a>
-										</li>
-										<li>
-											<a href="#">Media</a>
-										</li>
-										<li>
-											<a href="#">Design</a>					
-										</li>
-									</ul>
+									<img class = "avatar" src = https://image.freepik.com/free-vector/retro-gentleman-avatar-portrait-profile-picture-icon_1056-4464.jpg alt="">
+									
 								</div>
 								<div class="details">
 									<div class="title d-flex flex-row justify-content-between">
 										<div class="titles">
 											<a href="single.html"><h4>{{ profile['name'] }}</h4></a>
-											<h6></h6>					
+											<h6>{{profile['title']}}</h6>					
 										</div>
 										<ul class="btns">
 											<li><a href="#"><span class="lnr lnr-heart"></span></a></li>
@@ -324,9 +314,20 @@
 									<p>
 										{{ profile['about'] }}
 									</p>
-									<h5>Job Nature: Full time</h5>
+									<!-- <h5>Job Nature: Full time</h5> -->
 									<p class="address"><span class="lnr lnr-map"></span> {{ profile['location'] }} </p>
-									<p class="address"><span class="lnr lnr-graduation-hat"></span> {{ profile['education'] }}</p>
+									<!-- <p class="address"><span class="lnr lnr-graduation-hat"></span> {{ profile['education'] }}</p> -->
+
+									<div class="thumb">
+										<ul class="tags">
+
+											{% for skill in profile['skills'] %}
+											<li>
+												<a href="#">{{skill}}</a>
+											</li>
+											{% endfor %}
+										</ul>
+									</div>
 								</div>
 							</div>
 							
