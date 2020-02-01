@@ -46,6 +46,7 @@ for i in range(4):
         print("waited")
         time.sleep(3)
         string = source
+        profile_pic=""
         try:
             soup = BeautifulSoup(string, 'html.parser')
             img = soup.findAll("img", {"class": "pv-top-card__photo"})
@@ -129,5 +130,5 @@ for i in range(4):
             print("error in skills")
             traceback.print_exc()
         count+=1
-        crud.insertDB(name, location, skills_string, main_exp_data, main_about_string, title)
+        crud.insertDB(name, location, skills_string, main_exp_data, main_about_string, title, profile_pic)
 driver.quit()
