@@ -11,11 +11,11 @@ my_database = db_connection.cursor()
 profiles = [] # array of profiles # list
 profile = {} # json of each profile # dict
 
-def insertDB(name, location, skills, exp, about, title):
+def insertDB(name, location, skills, exp, about, title, image):
 
     print(".............INSERTING INTO Database...........")
-    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`, title) VALUES (%s, %s, %s, %s, %s, %s)"
-    val = (name, location, skills, exp, about, title)
+    sql = "INSERT INTO `profiles`( `name`, `location`, `skills`, `exp`, `about`, title, image) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    val = (name, location, skills, exp, about, title, image)
     my_database.execute(sql, val)
 
     db_connection.commit()
@@ -27,18 +27,19 @@ def readDB():
     myresult = my_database.fetchall()
 
     for x in myresult:
-        
+
         profile = {}
         profile['id'] = x[0]
         profile['name'] = x[1]
         profile['location'] = x[2]
 
         profile['skills'] = convert_skills_to_array(x[3])
-        
+
         profile['experience'] = x[4]
         profile['about '] = x[5]
         profile['title'] = x[6]
-        
+        profile['image-url'] =x[7]
+
         profiles.append(profile)
         # print(profiles)
 
@@ -55,7 +56,7 @@ def convert_skills_to_array(skills):
             continue
         else:
             new_data.append(data[i])
-    
+
     return new_data
-        
+
 # readDB()
