@@ -1,23 +1,13 @@
 from bs4 import BeautifulSoup
-from nltk import tokenize
-
-# def removesubstr(lstr,smallstr):
-#     for i in range(len(lstr)):
-#         b=False
-#         for j in range(0,len(smallstr)):
-#             if(lstr[i+j]!=smallstr):
-
 
 
 
 f = open("MyFile2.txt","r")
 string = f.read()
 soup = BeautifulSoup(string, 'html.parser')
-#print(soup.prettify())
 img = soup.findAll("img", {"class": "pv-top-card__photo"})
 profile_pic=img[0]['src']
 about =soup.findAll("p",{"class":"pv-about__summary-text"})
-#print(about[0].span.text)
 about_data=[]
 for e in about[0]:
     try:
@@ -26,10 +16,8 @@ for e in about[0]:
             break
     except:
         continue
-#print(ls)
 
 expdiv =soup.find("div",{"class":"pv-profile-section-pager ember-view"})
-#print(expdiv)
 section=expdiv.find("section",{"class":"pv-profile-section"})
 a=section.find("ul").findAll("li")
 exp=[]
@@ -39,8 +27,7 @@ for e in a:
        continue
    else:
        exp.append(data)
-   #print("~~~~~~~~~~~~~~~~~~~")
-#print(exp)
+       
 expdata=[]
 for e in exp:
     ls=e.splitlines()
@@ -49,6 +36,10 @@ for e in exp:
             continue
         else:
             expdata.append(str1.strip())
-print(expdata)
 
-
+intro=soup.find("div",{"class":"flex-1 mr5"})
+name=intro.ul.li.text.strip()
+title=intro.h2.text.strip()
+ul=intro.findAll("ul")
+location=ul[1].li.text.strip()
+print(name,title,location)
