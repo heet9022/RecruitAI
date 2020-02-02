@@ -22,15 +22,32 @@ def index():
     #     data = json.load(f)
 
     data = crud.readDB()
-    
+    script_activate = 0 
     print(data)
-    return render_template("index.html", data = data)
+    return render_template("index.html", data = data, script_activate = script_activate)
 
-# @app.route('/submit')
-# def submit():
+@app.route('/submit', methods=['POST'])
+def submit():
 
-#     return 'OK'
-  
+    if request.method == 'POST':
+        location = request.form['location']
+        skills = request.form['skills']
+
+    # run ML script
+    job_category = "Cloud Engineer" # data from ML
+    result = crud.search_query(job_category, location)
+
+    # script = '<script>location.href = "#";location.href = "#results";</script>'
+    script_activate = 1 
+
+    return render_template("index.html", data = result, script_activate = script_activate)
+
+@app.route('/resume')
+def resume():
+    import resume_scraper
+    print(resume_scraper.main_dict)
+    script_activate = 1 
+    return render_template("index.html", data = resume_scraper.main_dict, script_activate = script_activate)  
 # main driver function 
 if __name__ == '__main__': 
   

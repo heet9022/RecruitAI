@@ -42,15 +42,15 @@
 							<h1 class="text-white">
 								<span>1500+</span> Candidates 				
 							</h1>	
-							<form action="search.html" class="serach-form-area">
+							<form class="serach-form-area" action="/submit" method="POST">
 								<div class="row justify-content-center form-wrap">
 									<div class="col-lg-4 form-cols">
-										<input type="text" class="form-control" name="search" placeholder="what are you looking for?">
-									</div>
-									<div class="col-lg-4 form-cols">
-										<input type="text" class="form-control" name="location" placeholder="Location">
+										<input type="text" class="form-control" name="skills" placeholder="what are you looking for?">
 									</div>
 									<div class="col-lg-3 form-cols">
+										<input type="text" class="form-control" name="location" placeholder="Location">
+									</div>
+									<!-- <div class="col-lg-3 form-cols">
 										<div class="default-select" id="default-selects2">
 											<select>
 												<option value="1">All Category</option>
@@ -60,9 +60,9 @@
 												<option value="5">Development</option>
 											</select>
 										</div>										
-									</div>
+									</div> -->
 									<div class="col-lg-2 form-cols">
-									    <button type="button" class="btn btn-info">
+									    <button type="submit" class="btn btn-info">
 									      <span class="lnr lnr-magnifier"></span> Search
 									    </button>
 									</div>								
@@ -76,44 +76,46 @@
 			<!-- End banner Area -->	
 
 			<!-- Start features Area -->
-			<section class="features-area">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-3 col-md-6">
-							<div class="single-feature">
-								<h4>Searching</h4>
-								<p>
-									Lorem ipsum dolor sit amet, consectetur adipisicing.
-								</p>
-							</div>
-						</div>
-						<div class="col-lg-3 col-md-6">
-							<div class="single-feature">
-								<h4>Applying</h4>
-								<p>
-									Lorem ipsum dolor sit amet, consectetur adipisicing.
-								</p>
-							</div>
-						</div>
-						<div class="col-lg-3 col-md-6">
-							<div class="single-feature">
-								<h4>Security</h4>
-								<p>
-									Lorem ipsum dolor sit amet, consectetur adipisicing.
-								</p>
-							</div>
-						</div>
-						<div class="col-lg-3 col-md-6">
-							<div class="single-feature">
-								<h4>Notifications</h4>
-								<p>
-									Lorem ipsum dolor sit amet, consectetur adipisicing.
-								</p>
-							</div>
-						</div>																		
-					</div>
-				</div>	
-			</section>
+			<script>
+			// <section class="features-area">
+			// 	<div class="container">
+			// 		<div class="row">
+			// 			<div class="col-lg-3 col-md-6">
+			// 				<div class="single-feature">
+			// 					<h4>Searching</h4>
+			// 					<p>
+			// 						Lorem ipsum dolor sit amet, consectetur adipisicing.
+			// 					</p>
+			// 				</div>
+			// 			</div>
+			// 			<div class="col-lg-3 col-md-6">
+			// 				<div class="single-feature">
+			// 					<h4>Applying</h4>
+			// 					<p>
+			// 						Lorem ipsum dolor sit amet, consectetur adipisicing.
+			// 					</p>
+			// 				</div>
+			// 			</div>
+			// 			<div class="col-lg-3 col-md-6">
+			// 				<div class="single-feature">
+			// 					<h4>Security</h4>
+			// 					<p>
+			// 						Lorem ipsum dolor sit amet, consectetur adipisicing.
+			// 					</p>
+			// 				</div>
+			// 			</div>
+			// 			<div class="col-lg-3 col-md-6">
+			// 				<div class="single-feature">
+			// 					<h4>Notifications</h4>
+			// 					<p>
+			// 						Lorem ipsum dolor sit amet, consectetur adipisicing.
+			// 					</p>
+			// 				</div>
+			// 			</div>																		
+			// 		</div>
+			// 	</div>	
+			// </section>
+			</script>
 			<!-- End features Area -->
 			
 			<!-- Start popular-post Area -->
@@ -271,23 +273,29 @@
 			<!-- End feature-cat Area -->
 			
 			<!-- Start post Area -->
-			<section class="post-area section-gap">
+			<section class="post-area section-gap" id = "results">
 				<div class="container">
 					<div class="row justify-content-center d-flex">
 						<div class="col-lg-8 post-list">
-							<ul class="cat-list">
+							<!-- <ul class="cat-list">
 								<li><a href="#">Home</a></li>
 								<li><a href="#">Full Time</a></li>
 								<li><a href="#">Intern</a></li>
 								<li><a href="#">part Time</a></li>
-							</ul>
+							</ul> -->
+
+							<a class="text-uppercase loadmore-btn mx-auto d-block"  href="/resume">Load More from resumes</a>
+							<br>
 
 							{% for profile in data %}
+							{% set img_url = "https://image.freepik.com/free-vector/retro-gentleman-avatar-portrait-profile-picture-icon_1056-4464.jpg" %}
 
+							{% set url = profile['image-url'] if profile['image-url'] else img_url %}
+								
 							<div class="single-post d-flex flex-row">
 
 								<div class="thumb">
-									<img class = "avatar" src = https://image.freepik.com/free-vector/retro-gentleman-avatar-portrait-profile-picture-icon_1056-4464.jpg alt="">
+									<img class = "avatar" src = "{{url}}" >
 									
 								</div>
 								<div class="details">
@@ -452,6 +460,10 @@
 			</section>
 			<!-- End post Area -->
 			
+			
+			{% for _ in range(script_activate) %}
+				<script>location.href = "#";location.href = "#results";</script>
+			{% endfor %}
 
 			<script src="{{ url_for('static', filename = 'js/vendor/jquery-2.2.4.min.js') }}"></script>
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
