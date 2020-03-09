@@ -248,7 +248,7 @@ if __name__ == "__main__":
 
     for category in categories:
 
-        email = <ADD EMAIL>
-        password = <ADD PASSWORD>
+        email = "kjoe4773@gmail.com"
+        password = "S&{%|X^(ea>Z;2o"
         obj = LinkedinScraper(email, password, category)
         obj.start()
