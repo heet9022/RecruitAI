@@ -3,7 +3,7 @@ import os
 import glob
 import json
 
-os.chdir('resumes')
+os.chdir('Data/resumes')
 ls_files=os.listdir()
 
 relevant_dataset = []
