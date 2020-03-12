@@ -1,40 +1,53 @@
-import csv
 from selenium import webdriver
 from time import sleep
 from selenium.webdriver.common.keys import Keys
 from parsel import Selector
 from selenium import webdriver
-from bs4 import BeautifulSoup 
+from bs4 import BeautifulSoup
+
+import csv
+import logging
+
+logger = logging.getLogger()
+
+no_of_pages = 5
 
 
+def generate(category='Digital Media'):
 
-no_of_pages = 1
+    logger.info("Generating links.....................")
 
-def generate(category):
-
-    print("Generating links.....................")
-    
-    driver=webdriver.Chrome()
+    driver = webdriver.Chrome()
     driver.get("https://www.google.com")
-    search_query=driver.find_element_by_name('q')
+    search_query = driver.find_element_by_name('q')
     sleep(0.5)
     search_query.send_keys('site:linkedin.com/in/ AND '+category)
     search_query.send_keys(Keys.RETURN)
 
     links = []
+    count = 1
     for _ in range(no_of_pages):
 
-        soup = BeautifulSoup(driver.page_source)
-        next_pg = driver.find_element_by_class_name('pn')
-        next_pg.send_keys(Keys.RETURN)
         sleep(1)
-        url = [x.a['href'] for x in soup.find_all("div", class_="r")]
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
+        url = [x.a['href'] for x in soup.find_all(
+            "div", class_="r") if 'linkedin' in x.a['href']]
         links.append(url)
-        print(links)
 
-    print("..................Links generated!")
+        if(count == 1):
+            next_page = soup.find_all("a", class_="G0iuSb")[0]['href']
+        else:
+            next_page = soup.find_all("a", class_="G0iuSb")[1]['href']
+
+        driver.get('https://www.google.com/'+str(next_page))
+        count = count + 1
+
+    logger.info(links)
+    logger.info("..................Links generated!")
+
     driver.quit()
     return links
+
 
 if __name__ == "__main__":
     generate()
