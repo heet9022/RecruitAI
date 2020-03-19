@@ -154,6 +154,7 @@ Werkzeug==0.15.1
 widgetsnbextension==3.4.2
 wordcloud==1.6.0
 wrapt==1.11.2
+xgboost==1.0.2
 xlrd==1.2.0
 XlsxWriter==1.2.7
 zipp==3.1.0
