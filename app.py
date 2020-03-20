@@ -5,24 +5,21 @@ from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 from spacy.lang.en.stop_words import STOP_WORDS
 from spacy.lang.en import English
-from sklearn import metrics
 from wordcloud import WordCloud
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.multiclass import OneVsRestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import SGDClassifier, LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-import xgboost as xgb
 
 import string
 import re
 import spacy
-import en_core_web_sm
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+
+import sys
+sys.path.append('Scraper/')
+
+from database_module import DatabaseConnector 
+
 
 punctuations = string.punctuation
 stop_words = spacy.lang.en.stop_words.STOP_WORDS
@@ -54,9 +51,9 @@ def clean_text(text):
     text = text.replace('\\n', '\n')
     text = text.replace('\\t', '\n')
     text = text.replace('\\r', '\n')
-    # text = text[2:-1] #remove 'b
+    
     text = text.replace("'b", ' ')
-    text = re.sub('nan ', ' ', text)
+    text = re.sub(' nan ', ' ', text)
     text = re.sub(r'\\x[0-9a-z]{2}', r' ', text)
     text = re.sub(r'[0-9]{2,}', r' ', text)
     text = re.sub('http\S+\s*', ' ', text)  # remove URLs
@@ -90,12 +87,16 @@ tfidf_vector = TfidfVectorizer(tokenizer=spacy_tokenizer, max_features=3500)
 
 classifier = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)
 
+
+
+
 app = Flask(__name__)
 
 
 @app.route('/')
 def index():
 
+    db = DatabaseConnector()
     return render_template("index.html")
 
 
@@ -115,7 +116,6 @@ def classify():
         d = {}
         d['class'] = str(prediction)
         result.append(d)
-    print(result)
 
     return jsonify(result)
 

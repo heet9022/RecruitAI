@@ -287,16 +287,16 @@ if __name__ == "__main__":
 
     accounts = [
         {
-            'email' : "kjoe4773@gmail.com",
-            'password' : "S&{%|X^(ea>Z;2o"
+            'email' : "enter email",
+            'password' : "enter password"
         }, 
         {
-            'email' : "ubzdbbmybymtdomwxp@awdrt.org",
-            'password' : "qazwsx123EDC"
+            'email' : "enter email",
+            'password' : "enter password"
         },
         {
-            'email' : "zxctrciabwzmpkyave@ttirv.com",
-            'password' : "qazwsx123EDC"
+            'email' : "enter email",
+            'password' : "enter password"
         },
     ]
 
