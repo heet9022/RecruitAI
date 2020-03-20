@@ -1,3 +1,5 @@
+from flask import Flask, jsonify, request, render_template
+
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, TfidfTransformer
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
@@ -25,8 +27,7 @@ import matplotlib.pyplot as plt
 punctuations = string.punctuation
 stop_words = spacy.lang.en.stop_words.STOP_WORDS
 parser = English()
-
-# Custom transformer using spaCy
+        
 class Predictors(TransformerMixin):
     def transform(self, X, **transform_params):
 
@@ -46,23 +47,10 @@ class Predictors(TransformerMixin):
     def get_params(self, deep=True):
         return {}
 
-
-# Debugger
-class Debug(TransformerMixin):
-
-    def transform(self, X):
-        print(pd.DataFrame(X))
-        print(X.shape)
-        return X
-
-    def fit(self, X, y=None, **fit_params):
-        return self
-
-
-
 # Basic function to clean the text
 def clean_text(text):
 
+    text = str(text)
     text = text.replace('\\n', '\n')
     text = text.replace('\\t', '\n')
     text = text.replace('\\r', '\n')
@@ -84,28 +72,14 @@ def clean_text(text):
 
     return text.strip()
 
-def makeWordCloud(data):
-    wc = WordCloud().generate(data)
-    plt.figure(figsize=(15, 15))
-    plt.imshow(wc, interpolation='bilinear')
-    plt.axis("off")
-    plt.show()
-
-
-# Creating our tokenizer function
+# Tokenizer function
 def spacy_tokenizer(sentence):
 
-    # Creating our token object, which is used to create documents with linguistic annotations.
     mytokens = parser(sentence)
 
-    # Lemmatizing each token and converting each token into lowercase
-    # -PRON- is for personal pronouns
-    mytokens = [word.lemma_.lower().strip() if word.lemma_ !=
-                "-PRON-" else word.lower_ for word in mytokens]
+    mytokens = [word.lemma_.lower().strip() if word.lemma_ !="-PRON-" else word.lower_ for word in mytokens]
 
-    # Removing stop words
-    mytokens = [
-        word for word in mytokens if word not in stop_words and word not in punctuations]
+    mytokens = [word for word in mytokens if word not in stop_words and word not in punctuations]
 
     return mytokens
 
@@ -114,53 +88,37 @@ def spacy_tokenizer(sentence):
 bow_vector = CountVectorizer(tokenizer=spacy_tokenizer, ngram_range=(1, 1), max_features=3500)
 tfidf_vector = TfidfVectorizer(tokenizer=spacy_tokenizer, max_features=3500)
 
+classifier = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)
 
-def train(resumeDataSet):
-
-    X = resumeDataSet['Resume']
-    ylabels = resumeDataSet['Category']
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, ylabels, test_size=0.3)
-
-    classifier = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)
-
-    # Create pipeline
-    pipe = Pipeline([('cleaner', Predictors()),
-                    ('vectorizer', tfidf_vector),
-                    ('classifier', classifier)])
-
-    # Model Generation
-    pipe.fit(X_train, y_train)
-
-    # Predicting with a test dataset
-    predicted = pipe.predict(X_test)
-
-    # Model Accuracy
-    print("Classification Report:",
-        metrics.classification_report(y_test, predicted))
-
-    with open('Models/localmodel2.pickle', 'wb') as f:
-        pickle.dump(pipe, f)
+app = Flask(__name__)
 
 
-def classify(testing_data):
+@app.route('/')
+def index():
 
-    # print("Test Data: ", testing_data)
-    # testing_data = pd.read_json(testing_data)
-    pickle_in = open('Models\localmodel2.pickle', 'rb')
+    return render_template("index.html")
+
+
+@app.route('/classify', methods=['POST'])
+def classify():
+
+    data = request.args.get('data')
+    # print(data)
+    testing_data = pd.read_json(data)
+    testing_data = testing_data.skills
+    # print(testing_data)
+    pickle_in = open('Classifier\Models\localmodel2.pickle', 'rb')
     pipe = pickle.load(pickle_in)
     predictions = pipe.predict(testing_data)
-    return predictions
+    result = []
+    for prediction in predictions:
+        d = {}
+        d['class'] = str(prediction)
+        result.append(d)
+    print(result)
 
+    return jsonify(result)
 
 if __name__ == '__main__':
-
-    resumeDataSet = pd.read_csv(
-        'Data/resume_eda_linkedin2.csv', encoding='utf-8')
-    resumeDataSet = resumeDataSet[['Category', 'Resume']]
-
-    # train(resumeDataSet)
-
-    testing_data = pd.read_csv('Data/resume_pdf_trimmed.csv', encoding='utf-8')
-    testing_data = testing_data.Resume
-    print(classify(testing_data))
+    
+    app.run(debug=True)

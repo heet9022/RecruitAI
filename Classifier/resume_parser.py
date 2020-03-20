@@ -1,10 +1,9 @@
 from pyresparser import ResumeParser
 import os
-import glob
 import json
 
 os.chdir('Data/resumes')
-ls_files=os.listdir()
+ls_files = os.listdir()
 
 relevant_dataset = []
 raw_dataset = []
@@ -19,14 +18,15 @@ for f in ls_files:
     relevant_data['name'] = raw_data['name']
     relevant_data['email'] = raw_data['email']
     relevant_data['mobile_number'] = raw_data['mobile_number']
-    skills=[]
+    skills = []
     for element in raw_data['skills']:
         skills.append(element)
     relevant_data['skills'] = skills
-    
+
     relevant_dataset.append(relevant_data)
 
 print("...........Writing to Json....... "+f)
+
 # with open('relevant_dataset.json', 'w') as fp:
 #     json.dump(relevant_dataset, fp)
 # with open('raw_dataset.json', 'w') as fp:

@@ -255,8 +255,8 @@ class LinkedinScraper:
                         "Scraper has stopped working for some reason. Please check logs. \n You should also check "+data_profile['URl'])
                     exit()
 
-                db.insertDB(data_profile['category'], data_profile['URl'], data_profile['image_url'], data_profile['about'],
-                            data_profile['experience'], data_profile['name'], data_profile['title'], data_profile['location'], data_profile['skills'])
+                # db.insertDB(data_profile['category'], data_profile['URl'], data_profile['image_url'], data_profile['about'],
+                #             data_profile['experience'], data_profile['name'], data_profile['title'], data_profile['location'], data_profile['skills'])
                 self.count += 1
                 self.scrapedData.append(data_profile)
 
@@ -287,16 +287,16 @@ if __name__ == "__main__":
 
     accounts = [
         {
-            'email' : <EMAIL>,
-            'password' : <PASSWORD>
+            'email' : "kjoe4773@gmail.com",
+            'password' : "S&{%|X^(ea>Z;2o"
         }, 
         {
-            'email' : <EMAIL>,
-            'password' : <PASSWORD>
+            'email' : "ubzdbbmybymtdomwxp@awdrt.org",
+            'password' : "qazwsx123EDC"
         },
         {
-            'email' : <EMAIL>,
-            'password' : <PASSWORD>
+            'email' : "zxctrciabwzmpkyave@ttirv.com",
+            'password' : "qazwsx123EDC"
         },
     ]
 
