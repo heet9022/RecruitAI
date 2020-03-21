@@ -1,5 +1,8 @@
 from flask import Flask, jsonify, request, render_template
 
+import sys
+sys.path.append('Scraper/')
+
 from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer, TfidfTransformer
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
@@ -15,26 +18,20 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.append('Scraper/')
 
-from database_module import DatabaseConnector 
+from database_module import DatabaseConnector
 
 
 punctuations = string.punctuation
 stop_words = spacy.lang.en.stop_words.STOP_WORDS
 parser = English()
-        
+
+
 class Predictors(TransformerMixin):
     def transform(self, X, **transform_params):
 
         # Cleaning Text
         cleaned_text = [clean_text(text) for text in X]
-
-        # complete_text = ''
-        # for text in cleaned_text:
-        #   complete_text += text
-        # makeWordCloud(complete_text)
 
         return cleaned_text
 
@@ -45,13 +42,14 @@ class Predictors(TransformerMixin):
         return {}
 
 # Basic function to clean the text
+
+
 def clean_text(text):
 
     text = str(text)
     text = text.replace('\\n', '\n')
     text = text.replace('\\t', '\n')
     text = text.replace('\\r', '\n')
-    
     text = text.replace("'b", ' ')
     text = re.sub(' nan ', ' ', text)
     text = re.sub(r'\\x[0-9a-z]{2}', r' ', text)
@@ -70,23 +68,27 @@ def clean_text(text):
     return text.strip()
 
 # Tokenizer function
+
 def spacy_tokenizer(sentence):
 
     mytokens = parser(sentence)
 
-    mytokens = [word.lemma_.lower().strip() if word.lemma_ !="-PRON-" else word.lower_ for word in mytokens]
+    mytokens = [word.lemma_.lower().strip() if word.lemma_ !=
+                "-PRON-" else word.lower_ for word in mytokens]
 
-    mytokens = [word for word in mytokens if word not in stop_words and word not in punctuations]
+    mytokens = [
+        word for word in mytokens if word not in stop_words and word not in punctuations]
 
     return mytokens
 
 
 # Vectorizer
-bow_vector = CountVectorizer(tokenizer=spacy_tokenizer, ngram_range=(1, 1), max_features=3500)
+bow_vector = CountVectorizer(
+    tokenizer=spacy_tokenizer, ngram_range=(1, 1), max_features=3500)
 tfidf_vector = TfidfVectorizer(tokenizer=spacy_tokenizer, max_features=3500)
 
-classifier = SGDClassifier(loss='hinge', penalty='l2', alpha=1e-3, random_state=42, max_iter=5, tol=None)
-
+classifier = SGDClassifier(loss='hinge', penalty='l2',
+                           alpha=1e-3, random_state=42, max_iter=5, tol=None)
 
 
 
@@ -97,28 +99,38 @@ app = Flask(__name__)
 def index():
 
     db = DatabaseConnector()
-    return render_template("index.html")
+    profiles = db.readDB()
+    return render_template("index.html", profiles = profiles)
 
 
-@app.route('/classify', methods=['POST'])
-def classify():
+@app.route('/predict', methods=['GET'])
+def predict():
 
-    data = request.args.get('data')
-    # print(data)
-    testing_data = pd.read_json(data)
+    data = {}
+    data['skills'] = request.args.get('skills')
+    data['location'] = request.args.get('location')
+
+    testing_data = pd.DataFrame(data, index=[0])
     testing_data = testing_data.skills
-    # print(testing_data)
+
     pickle_in = open('Classifier\Models\localmodel2.pickle', 'rb')
     pipe = pickle.load(pickle_in)
     predictions = pipe.predict(testing_data)
-    result = []
-    for prediction in predictions:
-        d = {}
-        d['class'] = str(prediction)
-        result.append(d)
+    
+    db = DatabaseConnector()
+    profiles = db.search_query(predictions[0], data['location'])
 
-    return jsonify(result)
+    # result = []
+    # for prediction in predictions:
+    #     d = {}
+    #     d['class'] = str(prediction)
+    #     db = DatabaseConnector()
+    #     print(db.search_query(prediction, data['location']))
+    #     result.append(d)
+
+    return render_template("index.html", profiles = profiles)
+
 
 if __name__ == '__main__':
-    
+
     app.run(debug=True)

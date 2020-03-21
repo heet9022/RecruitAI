@@ -1,3 +1,4 @@
 env
 debug.log
 __pycache__
+Scraper/linkedin_scraper.py

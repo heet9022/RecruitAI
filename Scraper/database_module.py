@@ -1,5 +1,6 @@
 import mysql.connector
 import logging
+import re
 
 logger = logging.getLogger()
 
@@ -14,7 +15,7 @@ class DatabaseConnector:
         passwd="",
         database="recruitai"
     )
-    
+
     my_database = db_connection.cursor()
 
     def insertDB(self, category, URl, image_url, about, experience, name, title, location, skills):
@@ -29,52 +30,56 @@ class DatabaseConnector:
 
     def readDB(self):
 
-        my_database.execute(
-            "SELECT * FROM profiles WHERE image IS NOT NULL LIMIT 10")
+        self.my_database.execute(
+            "SELECT * FROM profiles WHERE 1 LIMIT 10")
 
-        myresult = my_database.fetchall()
+        myresult = self.my_database.fetchall()
 
-        profiles = []  # array of profiles # list
+        profiles = []  
 
         for x in myresult:
 
-            profile = {}  # json of each profile # dict
+            profile = {}  
 
             profile['id'] = x[0]
-            profile['name'] = x[1]
-            profile['location'] = x[2]
-
-            profile['skills'] = convert_skills_to_array(x[3])
-
-            profile['experience'] = x[4]
-            profile['about'] = x[5]
-            profile['title'] = x[6]
-            profile['image-url'] = x[7]
+            profile['category'] = x[1]
+            profile['url'] = x[2]
+            profile['image-url'] = x[3]
+            profile['about'] = x[4]
+            profile['experience'] = x[5]
+            profile['name'] = x[6]
+            profile['title'] = x[7]
+            profile['location'] = x[8]
+            profile['skills'] = self.convert_skills_to_array(x[9])
 
             profiles.append(profile)
-            # print(profiles)
 
         return profiles
 
     def convert_skills_to_array(self, skills):
 
         data = []
-        data = skills.split('\n')
+        data = skills.split('\\n')
+        print("data: ", data)
         new_data = []
         for i in range(len(data)):
             data[i] = data[i].strip()
-            if(data[i].isspace() or data[i] == ''):
+            data[i] = re.sub(r'[^a-zA-Z\s]', r'', data[i])
+            if(data[i].isspace() or data[i] == '' or  data[i] == "','"):
                 continue
             else:
                 new_data.append(data[i])
 
+        print()
+        print("new_data: ",new_data)
+        print()
         return new_data
 
     def search_query(self, job_category, location):
         query = "SELECT * FROM `profiles` WHERE location LIKE '%" + \
             location + "%' AND title LIKE '%" + job_category + "%'"
-        my_database.execute(query)
-        myresult = my_database.fetchall()
+        self.my_database.execute(query)
+        myresult = self.my_database.fetchall()
 
         profiles = []  # array of profiles # list
 
@@ -83,18 +88,17 @@ class DatabaseConnector:
             profile = {}  # json of each profile # dict
 
             profile['id'] = x[0]
-            profile['name'] = x[1]
-            profile['location'] = x[2]
-
-            profile['skills'] = convert_skills_to_array(x[3])
-
-            profile['experience'] = x[4]
-            profile['about'] = x[5]
-            profile['title'] = x[6]
-            profile['image-url'] = x[7]
+            profile['category'] = x[1]
+            profile['url'] = x[2]
+            profile['image-url'] = x[3]
+            profile['about'] = x[4]
+            profile['experience'] = x[5]
+            profile['name'] = x[6]
+            profile['title'] = x[7]
+            profile['location'] = x[8]
+            profile['skills'] = self.convert_skills_to_array(x[9])
 
             profiles.append(profile)
-            # print(profiles)
 
         return profiles
 

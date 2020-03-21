@@ -12,7 +12,7 @@
       href="{{ url_for('static', filename = 'img/fav.png') }}"
     />
     <!-- Author Meta -->
-    <meta name="author" content="codepixer" />
+    <meta name="author" content="Sakaria" />
     <!-- Meta Description -->
     <meta name="description" content="" />
     <!-- Meta Keyword -->
@@ -77,7 +77,7 @@
         >
           <div class="banner-content col-lg-12">
             <h1 class="text-white"><span>1500+</span> Candidates</h1>
-            <form class="serach-form-area" action="/submit" method="POST">
+            <form class="serach-form-area" action="/predict" method="GET">
               <div class="row justify-content-center form-wrap">
                 <div class="col-lg-4 form-cols">
                   <input
@@ -93,6 +93,7 @@
                     class="form-control"
                     name="location"
                     placeholder="Location"
+          
                   />
                 </div>
                 <!-- <div class="col-lg-3 form-cols">
@@ -378,27 +379,21 @@
 								<li><a href="#">part Time</a></li>
 							</ul> -->
 
-            <a
-              class="text-uppercase loadmore-btn mx-auto d-block"
-              href="/resume"
-              >Load More from resumes</a
-            >
-            <br />
+            {% for profile in profiles %}
 
-            <!-- {% for profile in data %}
 							{% set img_url = "https://image.freepik.com/free-vector/retro-gentleman-avatar-portrait-profile-picture-icon_1056-4464.jpg" %}
 
-							{% set url = profile['image-url'] if profile['image-url'] else img_url %} -->
+							{% set url = profile['image-url'] if profile['image-url'] else img_url %}
 
             <div class="single-post d-flex flex-row">
               <div class="thumb">
                 <img class="avatar" src="{{url}}" />
               </div>
               <div class="details">
-                <div class="title d-flex flex-row justify-content-between">
+                <div class="title d-flex flex-row ">
                   <div class="titles">
-                    <!-- <a href="single.html"><h4>{{ profile['name'] }}</h4></a> -->
-                    <!-- <h6>{{profile['title']}}</h6>					 -->
+                    <a href="single.html"><h4>{{ profile['name'] }}</h4></a> 
+                    <h6>{{profile['title']}}</h6>					
                   </div>
                   <ul class="btns">
                     <li>
@@ -408,25 +403,25 @@
                   </ul>
                 </div>
                 <p>
-                  <!-- {{ profile['about'] }} -->
+                  {{ profile['about'] }}
                 </p>
                 <!-- <h5>Job Nature: Full time</h5> -->
-                <!-- <p class="address"><span class="lnr lnr-map"></span> {{ profile['location'] }} </p> -->
+                <p class="address"><span class="lnr lnr-map"></span> {{ profile['location'] }} </p>
                 <!-- <p class="address"><span class="lnr lnr-graduation-hat"></span> {{ profile['education'] }}</p> -->
 
                 <div class="thumb">
                   <ul class="tags">
-                    <!-- {% for skill in profile['skills'] %} -->
+                    {% for skill in profile['skills'][:3] %}
                     <li>
-                      <!-- <a href="#">{{skill}}</a> -->
+                      <a href="#">{{skill}}</a>
                     </li>
-                    <!-- {% endfor %} -->
+                    {% endfor %}
                   </ul>
                 </div>
               </div>
             </div>
 
-            <!-- {% endfor %} -->
+            {% endfor %}
 
             <a
               class="text-uppercase loadmore-btn mx-auto d-block"
