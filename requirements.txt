@@ -17,7 +17,7 @@ chardet==3.0.4
 Click==7.0
 colorama==0.4.1
 contractions==0.0.21
-cryptography==2.8
+cryptography==3.2
 cssselect==1.1.0
 cycler==0.10.0
 cymem==2.0.3
