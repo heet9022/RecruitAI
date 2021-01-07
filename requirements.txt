@@ -61,7 +61,7 @@ jupyter-console==6.0.0
 jupyter-core==4.4.0
 kiwisolver==1.0.1
 lazy-object-proxy==1.4.3
-lxml==4.3.4
+lxml==4.6.2
 MarkupSafe==1.1.1
 matplotlib==2.2.2
 mccabe==0.6.1
