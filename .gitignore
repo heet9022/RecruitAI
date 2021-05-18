@@ -1,4 +1,5 @@
 env
-debug.log
+Scraper/Logs/
 __pycache__
-Scraper/linkedin_scraper.py
+Scraper/.google-cookie
+Scraper/linkedin_credentials.json
