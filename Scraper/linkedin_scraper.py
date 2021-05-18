@@ -1,4 +1,5 @@
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -9,8 +10,9 @@ from parsel import Selector
 from bs4 import BeautifulSoup
 from itertools import cycle
 from selenium.common.exceptions import NoSuchElementException
-from database_module import DatabaseConnector
+# from database_module import DatabaseConnector
 
+import json
 import time
 import link_generator
 import proxy_generator
@@ -21,7 +23,7 @@ import threading
 import numpy as np
 
 chrome_settings = Options()
-db = DatabaseConnector()
+# db = DatabaseConnector()
 
 
 class LinkedinScraper:
@@ -44,23 +46,21 @@ class LinkedinScraper:
         self.logger.setLevel(logging.INFO)
 
         self.links = link_generator.generate(self.category)
-        # self.proxy = proxy_generator.get_proxy()
+        self.proxy = proxy_generator.get_proxy()
         self.scrapedData = []
 
-        # try:
-        #     prox = Proxy()
-        #     prox.proxy_type = ProxyType.MANUAL
-        #     prox.http_proxy = self.proxy
-        #     capabilities = webdriver.DesiredCapabilities.CHROME
-        #     prox.add_to_capabilities(capabilities)
-        #     self.driver = webdriver.Chrome(
-        #         chrome_options=chrome_settings, desired_capabilities=capabilities)
+        try:
+            prox = Proxy()
+            prox.proxy_type = ProxyType.MANUAL
+            prox.http_proxy = self.proxy
+            capabilities = webdriver.DesiredCapabilities.CHROME
+            prox.add_to_capabilities(capabilities)
+            self.driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_settings, desired_capabilities=capabilities)
 
-        # except Exception as e:
-        #     self.logger.critical("Driver Error: " + str(e))
+        except Exception as e:
+            self.logger.critical("Driver Error: " + str(e))
 
-        self.driver = webdriver.Chrome(
-                chrome_options=chrome_settings)
+        # self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=chrome_settings)
 
     def openLinkedin(self):
 
@@ -68,8 +68,7 @@ class LinkedinScraper:
 
         try:
             self.driver.get("https://www.linkedin.com/login")
-            element = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.ID, "username")))
+            element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "username")))
             email_element = self.driver.find_element_by_id("username")
             email_element.send_keys(self.email)
             password_element = self.driver.find_element_by_id("password")
@@ -81,193 +80,179 @@ class LinkedinScraper:
 
     def scrape(self):
 
-        for page in range(link_generator.no_of_pages):
-            for link in self.links[page]:
+    
+        for link in self.links:
 
-                profile_pic = ''
-                about = ''
-                main_exp_data = ''
-                name = ''
-                title = ''
-                location = ''
-                skills = ''
+            profile_pic = ''
+            about = ''
+            main_exp_data = ''
+            name = ''
+            title = ''
+            location = ''
+            skills = ''
 
-                data_profile = {}
-                data_profile['category'] = self.category
-                self.logger.info("Profile #"+str(self.count))
+            data_profile = {}
+            data_profile['category'] = self.category
+            self.logger.info("Profile #"+str(self.count))
+            try:
+
+                data_profile['URl'] = link
+                self.driver.get(link)
+                self.logger.info("Waiting for page to completely load.................")
                 try:
+                    element = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, "profile-nav-item")))
+                except Exception as e:
+                    self.logger.error(str(e))
 
-                    data_profile['URl'] = link
-                    self.driver.get(link)
-                    self.logger.info(
-                        "Waiting for page to completely load.................")
+                time.sleep(5)
+
+                y_coord = 500
+                for i in range(5):
+                    self.driver.execute_script("window.scrollTo(0, " + str(y_coord) + ");")
+                    time.sleep(2)
+                    y_coord += 500
+
+                source = self.driver.page_source
+
+            except Exception as e:
+                self.logger.error("Error while waiting " + str(e))
+
+            self.logger.info("..................Page loaded")
+
+            time.sleep(1)
+
+            # Profile Picture and About data
+
+            soup = BeautifulSoup(source, 'html.parser')
+
+            try:
+                image = soup.findAll("img", {"class": "pv-top-card__photo"})
+                profile_pic = image[0]['src']
+
+            except NoSuchElementException as e:
+                self.logger.warn(str(e))
+
+            except Exception as e:
+                self.logger.error("Error while scraping Profile Picture: " + str(e))
+
+            data_profile['image_url'] = profile_pic
+
+            try:
+                about_elements = soup.findAll("p", {"class": "pv-about__summary-text"})
+
+                for element in about_elements[0].children:
                     try:
-                        element = WebDriverWait(self.driver, 10).until(
-                            EC.presence_of_element_located((By.ID, "profile-nav-item")))
-                    except Exception as e:
-                        self.logger.error(str(e))
+                        if '...' in element.text:
+                            break
+                        about = about + element.text.strip()
 
-                    time.sleep(5)
+                    except:
+                        continue
 
-                    y_coord = 500
-                    for i in range(5):
-                        self.driver.execute_script(
-                            "window.scrollTo(0, " + str(y_coord) + ");")
-                        time.sleep(2)
-                        y_coord += 500
+            except (NoSuchElementException, IndexError) as e:
+                self.logger.warn(str(e))
 
-                    source = self.driver.page_source
+            except Exception as e:
+                self.logger.error("Error while scraping About: " + str(e))
 
-                except Exception as e:
-                    self.logger.error("Error while waiting " + str(e))
+            data_profile['about'] = about
 
-                self.logger.info("..................Page loaded")
+            # Experience data
 
-                time.sleep(1)
+            try:
+                experience_div = soup.find("div", {"class": "pv-profile-section-pager ember-view"})
+                experience_section = experience_div.find("section", {"class": "pv-profile-section"})
+                lists = experience_section.find("ul").findAll("li")
 
-                # Profile Picture and About data
+            except NoSuchElementException as e:
+                self.logger.warn(str(e))
 
-                soup = BeautifulSoup(source, 'html.parser')
+            except Exception as e:
+                self.logger.error("Error while scraping Experience " + str(e))
+                lists = []
 
-                try:
-                    image = soup.findAll(
-                        "img", {"class": "pv-top-card__photo"})
-                    profile_pic = image[0]['src']
+            exp = []
+            for element in lists:
+                data = element.text
+                if(data == "/n"):
+                    continue
+                else:
+                    exp.append(data)
 
-                except NoSuchElementException as e:
-                    self.logger.warn(str(e))
-
-                except Exception as e:
-                    self.logger.error(
-                        "Error while scraping Profile Picture: " + str(e))
-
-                data_profile['image_url'] = profile_pic
-
-                try:
-                    about_elements = soup.findAll(
-                        "p", {"class": "pv-about__summary-text"})
-
-                    for element in about_elements[0].children:
-                        try:
-                            if '...' in element.text:
-                                break
-                            about = about + element.text.strip()
-
-                        except:
-                            continue
-
-                except (NoSuchElementException, IndexError) as e:
-                    self.logger.warn(str(e))
-
-                except Exception as e:
-                    self.logger.error("Error while scraping About: " + str(e))
-
-                data_profile['about'] = about
-
-                # Experience data
-
-                try:
-                    experience_div = soup.find(
-                        "div", {"class": "pv-profile-section-pager ember-view"})
-                    experience_section = experience_div.find(
-                        "section", {"class": "pv-profile-section"})
-                    lists = experience_section.find("ul").findAll("li")
-
-                except NoSuchElementException as e:
-                    self.logger.warn(str(e))
-
-                except Exception as e:
-                    self.logger.error(
-                        "Error while scraping Experience " + str(e))
-                    lists = []
-
-                exp = []
-                for element in lists:
-                    data = element.text
-                    if(data == "/n"):
+            expdata = []
+            for element in exp:
+                ls = element.splitlines()
+                for str1 in ls:
+                    if(str1.isspace() or str1 == '' or str1.strip() == 'see more' or str1 == '...'):
                         continue
                     else:
-                        exp.append(data)
+                        main_exp_data = main_exp_data + str1.strip()
 
-                expdata = []
-                for element in exp:
-                    ls = element.splitlines()
-                    for str1 in ls:
-                        if(str1.isspace() or str1 == '' or str1.strip() == 'see more' or str1 == '...'):
-                            continue
-                        else:
-                            main_exp_data = main_exp_data + str1.strip()
+            main_exp_data = re.sub('•', '', main_exp_data)
+            main_exp_data = re.sub('  ', '', main_exp_data)
+            data_profile['experience'] = main_exp_data
 
-                main_exp_data = re.sub('•', '', main_exp_data)
-                main_exp_data = re.sub('  ', '', main_exp_data)
-                data_profile['experience'] = main_exp_data
+            # Name, Title, Location
+            try:
+                intro = soup.find("div", {"class": "flex-1 mr5"})
+                name = intro.ul.li.text.strip()
+                title = intro.h2.text.strip()
+                ul = intro.findAll("ul")
+                location = ul[1].li.text.strip()
 
-                # Name, Title, Location
+            except NoSuchElementException as e:
+                self.logger.warn(str(e))
+
+            except Exception as e:
+                self.logger.error(
+                    "Error while scraping name, title, location " + str(e))
+
+            data_profile['name'] = name
+            data_profile['title'] = title
+            data_profile['location'] = location
+
+            try:
                 try:
-                    intro = soup.find("div", {"class": "flex-1 mr5"})
-                    name = intro.ul.li.text.strip()
-                    title = intro.h2.text.strip()
-                    ul = intro.findAll("ul")
-                    location = ul[1].li.text.strip()
+                    self.driver.find_element_by_xpath("//button[@class='pv-profile-section__card-action-bar pv-skills-section__additional-skills artdeco-container-card-action-bar artdeco-button artdeco-button--tertiary artdeco-button--3 artdeco-button--fluid']").click()
 
                 except NoSuchElementException as e:
                     self.logger.warn(str(e))
 
                 except Exception as e:
-                    self.logger.error(
-                        "Error while scraping name, title, location " + str(e))
+                    self.logger.error("Error: " + str(e))
 
-                data_profile['name'] = name
-                data_profile['title'] = title
-                data_profile['location'] = location
+                sel = Selector(text=self.driver.page_source)
 
-                try:
-                    try:
-                        self.driver.find_element_by_xpath(
-                            "//button[@class='pv-profile-section__card-action-bar pv-skills-section__additional-skills artdeco-container-card-action-bar artdeco-button artdeco-button--tertiary artdeco-button--3 artdeco-button--fluid']").click()
+                skills = str(sel.xpath('//*[@class="pv-skill-category-entity__name-text t-16 t-black t-bold"]/text()').extract())
 
-                    except NoSuchElementException as e:
-                        self.logger.warn(str(e))
+                skills = re.sub('\n', '', skills)
+                skills = re.sub('  ', '', skills)
 
-                    except Exception as e:
-                        self.logger.error("Error: " + str(e))
+                data_profile['skills'] = skills
 
-                    sel = Selector(text=self.driver.page_source)
+            except NoSuchElementException as e:
+                self.logger.warn(str(e))
 
-                    skills = str(sel.xpath(
-                        '//*[@class="pv-skill-category-entity__name-text t-16 t-black t-bold"]/text()').extract())
+            except Exception as e:
+                self.logger.error("error in skills " + str(e))
 
-                    skills = re.sub('\n', '', skills)
-                    skills = re.sub('  ', '', skills)
+            self.logger.info(str(data_profile))
 
-                    data_profile['skills'] = skills
+            if (data_profile['about'] == '' and data_profile['experience'] == '' and data_profile['skills'] == ''):
+                self.logger.critical("Scraper has stopped working for some reason. Please check logs. \n You should also check "+data_profile['URl'])
+                exit()
 
-                except NoSuchElementException as e:
-                    self.logger.warn(str(e))
-
-                except Exception as e:
-                    self.logger.error("error in skills " + str(e))
-
-                self.logger.info(str(data_profile))
-
-                if (data_profile['about'] == '' and data_profile['experience'] == '' and data_profile['skills'] == ''):
-                    self.logger.critical(
-                        "Scraper has stopped working for some reason. Please check logs. \n You should also check "+data_profile['URl'])
-                    exit()
-
-                # db.insertDB(data_profile['category'], data_profile['URl'], data_profile['image_url'], data_profile['about'],
-                #             data_profile['experience'], data_profile['name'], data_profile['title'], data_profile['location'], data_profile['skills'])
-                self.count += 1
-                self.scrapedData.append(data_profile)
+            # db.insertDB(data_profile['category'], data_profile['URl'], data_profile['image_url'], data_profile['about'],
+            #             data_profile['experience'], data_profile['name'], data_profile['title'], data_profile['location'], data_profile['skills'])
+            self.count += 1
+            self.scrapedData.append(data_profile)
 
     def start(self):
 
         self.openLinkedin()
         self.scrape()
         self.driver.quit()
-        self.logger.info("Scraping completed for "+self.category)
-
-
+        self.logger.info("Scraping completed for " + self.category)
 
 class Batch:
 
@@ -282,26 +267,13 @@ class Batch:
             linkedinscraper = LinkedinScraper(self.account['email'], self.account['password'], subcategory)
             linkedinscraper.start()
 
-
 if __name__ == "__main__":
 
-    accounts = [
-        {
-            'email' : "enter email",
-            'password' : "enter password"
-        }, 
-        {
-            'email' : "enter email",
-            'password' : "enter password"
-        },
-        {
-            'email' : "enter email",
-            'password' : "enter password"
-        },
-    ]
+    f = open('linkedin_credentials.json')
+    data = json.load(f)
+    accounts = data["accounts"]
 
-    categories = ['Food & Beverages', 'Finance', 'Apparel',
-                  'Accountant', 'Architects', 'Public Relations', 'Arts', 'Aviation']
+    categories = ['Cloud Engineer', 'Data Scientist', 'Web Developer']
 
     no_of_batches = 1
 
