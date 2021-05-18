@@ -1,56 +1,35 @@
-from selenium import webdriver
-from time import sleep
-from selenium.webdriver.common.keys import Keys
-from parsel import Selector
-from selenium import webdriver
-from bs4 import BeautifulSoup
-
-import csv
 import logging
+from googlesearch import search
 
+def generate(category='Digital Media', no_of_results=50):
 
+    """This function queries google and returns a list of links of linkedin profiles depending on the argument given.
 
-no_of_pages = 5
+    Arguments:
 
+        str: category
+            Defines the category to be searched for in linkedin
 
-def generate(category='Digital Media'):
+        int: no_of_results
+            The number of links to be fetched.
+
+    Returns:
+        list: A list of links of linkedin Profiles
+    """
 
     logger = logging.getLogger()
-
     logger.info("Generating links.....................")
 
-    driver = webdriver.Chrome()
-    driver.get("https://www.google.com")
-    search_query = driver.find_element_by_name('q')
-    sleep(0.5)
-    search_query.send_keys('site:linkedin.com/in/ AND '+category)
-    search_query.send_keys(Keys.RETURN)
-
     links = []
-    count = 1
-    for _ in range(no_of_pages):
-
-        sleep(1)
-        soup = BeautifulSoup(driver.page_source, 'html.parser')
-        url = [x.a['href'] for x in soup.find_all(
-            "div", class_="r") if 'linkedin' in x.a['href']]
-        links.append(url)
-
-        if(count == 1):
-            next_page = soup.find_all("a", class_="G0iuSb")[0]['href']
-        else:
-            next_page = soup.find_all("a", class_="G0iuSb")[1]['href']
-
-        driver.get('https://www.google.com/'+str(next_page))
-        count = count + 1
-        sleep(1)
+    query = 'site:linkedin.com/in/ AND ' + category
+    for link in search(query, tld="com", num=no_of_results, stop=no_of_results, pause=2):
+        if 'linkedin' in link: 
+            links.append(link)
 
     logger.info(links)
     logger.info("..................Links generated!")
 
-    driver.quit()
     return links
-
 
 if __name__ == "__main__":
     generate()
